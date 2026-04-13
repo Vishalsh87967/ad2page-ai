@@ -7,6 +7,7 @@ from openai import OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.title("🚀 Ad2Page AI Personalizer")
+st.caption("Turn your ads into high-converting landing pages using AI + CRO")
 
 ad_text = st.text_area("Paste Ad Creative")
 url = st.text_input("Enter Landing Page URL")
@@ -55,10 +56,40 @@ Return JSON:
 
 if st.button("Generate"):
     if ad_text and url:
-        data = scrape_page(url)
-        if data:
-            result = personalize(ad_text, data)
-            st.write("Original:", data)
-            st.write("Personalized:", result)
-        else:
-            st.error("Error fetching page")
+        with st.spinner("Analyzing ad + optimizing page..."):
+            data = scrape_page(url)
+            if data:
+                result = personalize(ad_text, data)
+
+                import json
+
+                st.subheader("🔍 Before vs After")
+
+                try:
+                    parsed = json.loads(result)
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        st.markdown("### ❌ Original Page")
+                        st.write("**Headline:**", data["headline"])
+                        st.write("**Description:**", data["description"])
+
+                    with col2:
+                        st.markdown("### ✅ Personalized Page")
+                        st.write("**Headline:**", parsed["headline"])
+                        st.write("**Description:**", parsed["description"])
+                        st.write("**CTA:**", parsed["cta"])
+
+                except:
+                    st.write(result)
+
+            else:
+                st.error("Error fetching page")
+                st.markdown("---")
+st.markdown("### 💡 Why this works")
+st.write("""
+- Ensures message match between ad and landing page  
+- Improves conversion rates  
+- Applies CRO principles like urgency & clarity  
+""")
